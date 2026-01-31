@@ -1,0 +1,21 @@
+# Code owners for Genesis
+# These users will be requested for review
+
+# Default owners for everything
+* @genesis-synth/maintainers
+
+# Core module
+/genesis/core/ @genesis-synth/maintainers
+
+# Generators
+/genesis/generators/ @genesis-synth/maintainers
+
+# Privacy features
+/genesis/privacy/ @genesis-synth/maintainers
+
+# Documentation
+/docs/ @genesis-synth/maintainers
+*.md @genesis-synth/maintainers
+
+# CI/CD
+/.github/ @genesis-synth/maintainers

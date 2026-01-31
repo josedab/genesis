@@ -1,0 +1,8 @@
+# GitHub Sponsors funding configuration
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+github: [genesis-synth]
+# patreon: genesis
+# open_collective: genesis
+# ko_fi: genesis
+# custom: ["https://www.buymeacoffee.com/genesis"]

@@ -1,0 +1,17 @@
+apiVersion: v2
+name: genesis
+description: A Helm chart for Genesis Synthetic Data Generation Platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - synthetic-data
+  - machine-learning
+  - privacy
+  - data-generation
+home: https://github.com/genesis-synth/genesis
+sources:
+  - https://github.com/genesis-synth/genesis
+maintainers:
+  - name: Genesis Team
+    email: team@genesis-synth.io
