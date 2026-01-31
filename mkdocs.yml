@@ -1,0 +1,123 @@
+site_name: Genesis
+site_url: https://genesis-synth.github.io/genesis
+site_description: Comprehensive synthetic data generation platform for ML training, testing, and development
+site_author: Genesis Team
+repo_url: https://github.com/genesis-synth/genesis
+repo_name: genesis-synth/genesis
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2024 Genesis Team
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_signature_annotations: true
+            members_order: source
+            docstring_style: google
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/genesis-synth/genesis
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/genesis-synth/
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: quickstart.md
+  - User Guide:
+    - Tabular Data: user_guide/tabular.md
+    - Time Series: user_guide/timeseries.md
+    - Text Generation: user_guide/text.md
+    - Conditional Generation: user_guide/conditional_generation.md
+    - Streaming: user_guide/streaming.md
+    - Federated Learning: user_guide/federated.md
+    - Data Lineage: user_guide/lineage.md
+    - Quality Dashboard: user_guide/dashboard.md
+    - Privacy Configuration: user_guide/privacy.md
+    - Quality Evaluation: user_guide/evaluation.md
+    - AutoML Synthesis: user_guide/automl.md
+    - Data Augmentation: user_guide/augmentation.md
+    - Privacy Attack Testing: user_guide/privacy_attacks.md
+    - LLM Schema Inference: user_guide/llm_inference.md
+    - Drift Detection: user_guide/drift.md
+    - Dataset Versioning: user_guide/versioning.md
+    - GPU Acceleration: user_guide/gpu.md
+    - Domain Generators: user_guide/domains.md
+    - Pipeline Builder: user_guide/pipeline.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - v1.3.0 Features: architecture/v130_features.md
+    - v1.4.0 Features: architecture/v140_features.md
+    - Decisions:
+      - Backend Selection: architecture/decisions/001-framework-agnostic-backends.md
+      - API Design: architecture/decisions/002-sklearn-style-api.md
+      - Constraint System: architecture/decisions/003-constraint-system.md
+      - Privacy Design: architecture/decisions/004-privacy-by-design.md
+  - API Reference:
+    - Core API: api/reference.md
+    - v1.2.0 Features: api/v120_features.md
+    - v1.3.0 Features: api/v130_features.md
+    - v1.4.0 Features: api/v140_features.md
+  - ADRs: adr/README.md
+  - Examples: examples/index.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
