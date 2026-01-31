@@ -107,7 +107,7 @@ streaming = [
     "websockets>=10.0,<14.0",
 ]
 reporting = [
-    "weasyprint>=57.0,<62.0",
+    "weasyprint>=57.0,<67.0",
 ]
 all = [
     "genesis-synth[pytorch,tensorflow,llm,viz,api,image,integrations,tuning,distributed,streaming,reporting,dev,docs]",
