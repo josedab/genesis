@@ -44,6 +44,66 @@ from typing import List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+# =============================================================================
+# CONSTANTS - Thresholds and Configuration Values
+# =============================================================================
+
+# Meta-feature extraction constants
+DEFAULT_SAMPLE_SIZE = 10000
+DEFAULT_RANDOM_STATE = 42
+MIN_VALUES_FOR_MULTIMODAL = 100
+HISTOGRAM_BINS = 20
+EXTREME_RATIO_CAP = 100
+OUTLIER_IQR_MULTIPLIER = 1.5
+QUANTILE_LOWER = 0.25
+QUANTILE_UPPER = 0.75
+
+# Correlation analysis constants
+CORRELATION_CLUSTER_THRESHOLD = 0.7
+HIGH_CORRELATION_THRESHOLD = 0.8
+VERY_HIGH_CORRELATION_THRESHOLD = 0.9
+
+# Complexity scoring thresholds
+LARGE_DATASET_ROWS = 100000
+MEDIUM_DATASET_ROWS = 10000
+SMALL_DATASET_ROWS = 1000
+LARGE_COLUMNS_THRESHOLD = 50
+MEDIUM_COLUMNS_THRESHOLD = 20
+HIGH_CARDINALITY_THRESHOLD = 100
+MEDIUM_CARDINALITY_THRESHOLD = 20
+HIGH_IMBALANCE_THRESHOLD = 10
+SKEWED_COLUMN_FRACTION = 0.3
+
+# Complexity score weights
+COMPLEXITY_WEIGHT_LARGE_ROWS = 0.15
+COMPLEXITY_WEIGHT_MEDIUM_ROWS = 0.1
+COMPLEXITY_WEIGHT_LARGE_COLS = 0.15
+COMPLEXITY_WEIGHT_MEDIUM_COLS = 0.1
+COMPLEXITY_WEIGHT_MULTIMODAL = 0.15
+COMPLEXITY_WEIGHT_CARDINALITY = 0.15
+COMPLEXITY_WEIGHT_CORRELATION = 0.1
+COMPLEXITY_WEIGHT_IMBALANCE = 0.1
+MAX_COMPLEXITY_SCORE = 1.0
+
+# Confidence score adjustments
+BASE_CONFIDENCE = 0.5
+CONFIDENCE_BOOST_SMALL = 0.1
+CONFIDENCE_BOOST_MEDIUM = 0.15
+CONFIDENCE_BOOST_LARGE = 0.2
+CONFIDENCE_PENALTY_SMALL = 0.1
+CONFIDENCE_PENALTY_MEDIUM = 0.15
+CONFIDENCE_PENALTY_LARGE = 0.2
+MIN_CONFIDENCE = 0.1
+MAX_CONFIDENCE = 1.0
+
+# Speed/time factors
+TIME_FACTOR_VERY_FAST = 0.5
+TIME_FACTOR_FAST = 1.0
+TIME_FACTOR_MEDIUM = 3.0
+TIME_FACTOR_SLOW = 10.0
+
+# =============================================================================
+
 
 class GenerationMethod(str, Enum):
     """Available generation methods for synthetic data.
@@ -215,7 +275,7 @@ class MetaFeatureExtractor:
         >>> print(f"Complexity: {features.estimated_complexity:.2f}")
     """
 
-    def __init__(self, sample_size: int = 10000):
+    def __init__(self, sample_size: int = DEFAULT_SAMPLE_SIZE):
         """Initialize the meta-feature extractor.
 
         Args:
@@ -234,7 +294,7 @@ class MetaFeatureExtractor:
         """
         # Sample if too large
         if len(data) > self.sample_size:
-            data = data.sample(n=self.sample_size, random_state=42)
+            data = data.sample(n=self.sample_size, random_state=DEFAULT_RANDOM_STATE)
 
         features = DatasetMetaFeatures()
 
@@ -310,10 +370,13 @@ class MetaFeatureExtractor:
         outlier_counts = []
         for col in df.columns:
             try:
-                q1, q3 = df[col].quantile([0.25, 0.75])
+                q1, q3 = df[col].quantile([QUANTILE_LOWER, QUANTILE_UPPER])
                 iqr = q3 - q1
                 if iqr > 0:
-                    outliers = ((df[col] < q1 - 1.5 * iqr) | (df[col] > q3 + 1.5 * iqr)).mean()
+                    outliers = (
+                        (df[col] < q1 - OUTLIER_IQR_MULTIPLIER * iqr)
+                        | (df[col] > q3 + OUTLIER_IQR_MULTIPLIER * iqr)
+                    ).mean()
                     outlier_counts.append(outliers)
             except Exception:
                 pass
@@ -325,9 +388,9 @@ class MetaFeatureExtractor:
         for col in df.columns:
             try:
                 values = df[col].dropna().values
-                if len(values) > 100:
+                if len(values) > MIN_VALUES_FOR_MULTIMODAL:
                     # Simple heuristic: check for multiple peaks in histogram
-                    hist, _ = np.histogram(values, bins=20)
+                    hist, _ = np.histogram(values, bins=HISTOGRAM_BINS)
                     peaks = np.sum((hist[1:-1] > hist[:-2]) & (hist[1:-1] > hist[2:]))
                     if peaks > 1:
                         multimodal += 1
@@ -355,7 +418,7 @@ class MetaFeatureExtractor:
                 value_counts = df[col].value_counts(normalize=True)
                 if len(value_counts) > 1:
                     ratio = value_counts.iloc[0] / value_counts.iloc[-1]
-                    ratios.append(min(ratio, 100))  # Cap extreme ratios
+                    ratios.append(min(ratio, EXTREME_RATIO_CAP))  # Cap extreme ratios
             except Exception:
                 pass
         return np.mean(ratios) if ratios else 1.0
@@ -363,7 +426,6 @@ class MetaFeatureExtractor:
     def _estimate_correlation_clusters(self, corr_matrix: pd.DataFrame) -> int:
         """Estimate number of correlation clusters."""
         # Simple heuristic: count groups of highly correlated variables
-        threshold = 0.7
         n_cols = len(corr_matrix)
         if n_cols < 2:
             return 0
@@ -379,7 +441,10 @@ class MetaFeatureExtractor:
                 while queue:
                     current = queue.pop(0)
                     for j in range(n_cols):
-                        if j not in visited and corr_matrix.iloc[current, j] > threshold:
+                        if (
+                            j not in visited
+                            and corr_matrix.iloc[current, j] > CORRELATION_CLUSTER_THRESHOLD
+                        ):
                             visited.add(j)
                             queue.append(j)
                 clusters += 1
@@ -391,38 +456,40 @@ class MetaFeatureExtractor:
         complexity = 0.0
 
         # Size complexity
-        if features.n_rows > 100000:
-            complexity += 0.15
-        elif features.n_rows > 10000:
-            complexity += 0.1
+        if features.n_rows > LARGE_DATASET_ROWS:
+            complexity += COMPLEXITY_WEIGHT_LARGE_ROWS
+        elif features.n_rows > MEDIUM_DATASET_ROWS:
+            complexity += COMPLEXITY_WEIGHT_MEDIUM_ROWS
 
         # Column complexity
-        if features.n_columns > 50:
-            complexity += 0.15
-        elif features.n_columns > 20:
-            complexity += 0.1
+        if features.n_columns > LARGE_COLUMNS_THRESHOLD:
+            complexity += COMPLEXITY_WEIGHT_LARGE_COLS
+        elif features.n_columns > MEDIUM_COLUMNS_THRESHOLD:
+            complexity += COMPLEXITY_WEIGHT_MEDIUM_COLS
 
         # Distribution complexity
         if features.numeric_mean_skewness > 2:
-            complexity += 0.15
+            complexity += COMPLEXITY_WEIGHT_MULTIMODAL
         if features.multimodal_columns > 0:
-            complexity += 0.1 * min(features.multimodal_columns / max(features.n_numeric, 1), 1)
+            complexity += COMPLEXITY_WEIGHT_MEDIUM_ROWS * min(
+                features.multimodal_columns / max(features.n_numeric, 1), 1
+            )
 
         # Cardinality complexity
-        if features.categorical_max_cardinality > 100:
-            complexity += 0.15
-        elif features.categorical_max_cardinality > 20:
-            complexity += 0.1
+        if features.categorical_max_cardinality > HIGH_CARDINALITY_THRESHOLD:
+            complexity += COMPLEXITY_WEIGHT_CARDINALITY
+        elif features.categorical_max_cardinality > MEDIUM_CARDINALITY_THRESHOLD:
+            complexity += COMPLEXITY_WEIGHT_MEDIUM_ROWS
 
         # Correlation complexity
-        if features.max_correlation > 0.9:
-            complexity += 0.1
+        if features.max_correlation > VERY_HIGH_CORRELATION_THRESHOLD:
+            complexity += COMPLEXITY_WEIGHT_CORRELATION
 
         # Imbalance complexity
-        if features.categorical_imbalance_ratio > 10:
-            complexity += 0.1
+        if features.categorical_imbalance_ratio > HIGH_IMBALANCE_THRESHOLD:
+            complexity += COMPLEXITY_WEIGHT_IMBALANCE
 
-        return min(complexity, 1.0)
+        return min(complexity, MAX_COMPLEXITY_SCORE)
 
 
 class MethodSelector:
@@ -525,17 +592,17 @@ class MethodSelector:
     ) -> MethodRecommendation:
         """Evaluate a specific method for the given features."""
         profile = self.METHOD_PROFILES[method]
-        confidence = 0.5  # Base confidence
+        confidence = BASE_CONFIDENCE
         reasons = []
 
         # Complexity match
         if features.estimated_complexity <= profile["max_complexity"]:
-            confidence += 0.2
+            confidence += CONFIDENCE_BOOST_LARGE
             reasons.append(
                 f"Complexity ({features.estimated_complexity:.2f}) within method capability"
             )
         else:
-            confidence -= 0.2
+            confidence -= CONFIDENCE_BOOST_LARGE
             reasons.append(
                 f"Complexity ({features.estimated_complexity:.2f}) exceeds optimal range"
             )
@@ -543,60 +610,60 @@ class MethodSelector:
         # High cardinality handling
         if features.categorical_max_cardinality > 50:
             if profile["handles_high_cardinality"]:
-                confidence += 0.15
+                confidence += CONFIDENCE_BOOST_MEDIUM
                 reasons.append("Handles high cardinality categories well")
             else:
-                confidence -= 0.2
+                confidence -= CONFIDENCE_BOOST_LARGE
                 reasons.append("May struggle with high cardinality categories")
 
         # Multimodal handling
         if features.multimodal_columns > 0:
             if profile["handles_multimodal"]:
-                confidence += 0.15
+                confidence += CONFIDENCE_BOOST_MEDIUM
                 reasons.append("Handles multimodal distributions")
             else:
-                confidence -= 0.15
+                confidence -= CONFIDENCE_PENALTY_MEDIUM
                 reasons.append("May not capture multimodal distributions")
 
         # Size considerations
-        if features.n_rows < 1000:
+        if features.n_rows < SMALL_DATASET_ROWS:
             if method == GenerationMethod.GAUSSIAN_COPULA:
-                confidence += 0.1
+                confidence += CONFIDENCE_BOOST_SMALL
                 reasons.append("Good for small datasets")
             elif method in [GenerationMethod.CTGAN, GenerationMethod.TVAE]:
-                confidence -= 0.1
+                confidence -= CONFIDENCE_PENALTY_SMALL
                 reasons.append("Deep learning methods need more data")
         elif features.n_rows > 50000:
             if method == GenerationMethod.CTGAN:
-                confidence += 0.1
+                confidence += CONFIDENCE_BOOST_SMALL
                 reasons.append("Scales well with large datasets")
 
         # Skewness handling
-        if features.highly_skewed_columns > features.n_numeric * 0.3:
+        if features.highly_skewed_columns > features.n_numeric * SKEWED_COLUMN_FRACTION:
             if method in [GenerationMethod.CTGAN, GenerationMethod.TVAE]:
-                confidence += 0.1
+                confidence += CONFIDENCE_BOOST_SMALL
                 reasons.append("Handles skewed distributions")
             elif method == GenerationMethod.GAUSSIAN_COPULA:
-                confidence -= 0.1
+                confidence -= CONFIDENCE_PENALTY_SMALL
                 reasons.append("Gaussian assumption may not hold for skewed data")
 
         # Correlation complexity
-        if features.max_correlation > 0.8:
+        if features.max_correlation > HIGH_CORRELATION_THRESHOLD:
             if method in [GenerationMethod.CTGAN, GenerationMethod.COPULA_GAN]:
-                confidence += 0.1
+                confidence += CONFIDENCE_BOOST_SMALL
                 reasons.append("Captures complex correlations")
 
         # Speed adjustment
         time_factors = {
-            "very_fast": 0.5,
-            "fast": 1.0,
-            "medium": 3.0,
-            "slow": 10.0,
+            "very_fast": TIME_FACTOR_VERY_FAST,
+            "fast": TIME_FACTOR_FAST,
+            "medium": TIME_FACTOR_MEDIUM,
+            "slow": TIME_FACTOR_SLOW,
         }
 
         return MethodRecommendation(
             method=method,
-            confidence=max(0.1, min(confidence, 1.0)),
+            confidence=max(MIN_CONFIDENCE, min(confidence, MAX_CONFIDENCE)),
             reasons=reasons,
             estimated_quality=profile["quality_ceiling"] * confidence,
             estimated_time_factor=time_factors[profile["speed"]],
