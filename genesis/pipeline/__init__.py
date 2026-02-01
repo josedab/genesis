@@ -4,19 +4,16 @@ A fluent API and execution engine for building complex synthetic data
 generation workflows. Supports visual pipeline construction with nodes
 for data sources, transformations, generation, evaluation, and output.
 
-This module re-exports components from the pipeline subpackage for
-backward compatibility.
-
 Example:
     Building a simple pipeline::
 
-        from genesis.pipeline import PipelineBuilder, NodeType
+        from genesis.pipeline import PipelineBuilder
 
         pipeline = (
             PipelineBuilder("my_pipeline")
-            .add_node(NodeType.FILE_INPUT, {"file_path": "data.csv"})
-            .add_node(NodeType.GENERATOR, {"method": "ctgan", "n_samples": 1000})
-            .connect("node_0", "data", "node_1", "training_data")
+            .add_source("customers.csv")
+            .add_generator(method="ctgan", n_samples=10000)
+            .add_output("synthetic_customers.csv")
             .build()
         )
 
@@ -24,12 +21,10 @@ Example:
 
     Loading from YAML::
 
-        from genesis.pipeline import Pipeline
         pipeline = Pipeline.load("my_pipeline.yaml")
         pipeline.execute()
 """
 
-# Re-export from subpackage for backward compatibility
 from genesis.pipeline.builder import PipelineBuilder
 from genesis.pipeline.executor import PipelineExecutor
 from genesis.pipeline.nodes import (
