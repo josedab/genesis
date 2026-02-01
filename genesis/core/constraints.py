@@ -9,6 +9,17 @@ import pandas as pd
 
 from genesis.core.exceptions import ConstraintViolationError
 
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+# Delta adjustments for constraint enforcement
+RELATIVE_DELTA_FACTOR = 0.01  # 1% relative adjustment
+ABSOLUTE_DELTA_EPSILON = 1e-6  # Small epsilon to ensure strict inequality
+
+# Constraint iteration limits
+DEFAULT_MAX_ITERATIONS = 10
+
 
 class BaseConstraint(ABC):
     """Abstract base class for data constraints."""
@@ -275,7 +286,10 @@ class GreaterThanConstraint(BaseConstraint):
             if self.or_equal:
                 result.loc[violating, self.column] = result.loc[violating, self.other_column]
             else:
-                delta = np.abs(result.loc[violating, self.other_column]) * 0.01 + 1e-6
+                delta = (
+                    np.abs(result.loc[violating, self.other_column]) * RELATIVE_DELTA_FACTOR
+                    + ABSOLUTE_DELTA_EPSILON
+                )
                 result.loc[violating, self.column] = (
                     result.loc[violating, self.other_column] + delta
                 )
@@ -456,7 +470,7 @@ class ConstraintSet:
         return result
 
     def validate_and_transform(
-        self, data: pd.DataFrame, max_iterations: int = 10
+        self, data: pd.DataFrame, max_iterations: int = DEFAULT_MAX_ITERATIONS
     ) -> Tuple[pd.DataFrame, Dict[str, bool]]:
         """Validate and iteratively transform until all constraints are satisfied.
 
