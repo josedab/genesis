@@ -208,3 +208,106 @@ class PrivacyMetrics:
 # Callback types
 ProgressCallback = Callable[[int, int, Dict[str, Any]], None]
 EarlyStoppingCallback = Callable[[int, float], bool]
+
+
+@dataclass
+class TrainingEvent:
+    """Event data passed to training callbacks.
+
+    Attributes:
+        step: Current training step (epoch or batch)
+        total_steps: Total number of steps (if known)
+        phase: Training phase (e.g., 'fitting', 'generating', 'evaluating')
+        metrics: Dictionary of metric values
+        message: Optional human-readable message
+    """
+
+    step: int
+    total_steps: Optional[int] = None
+    phase: str = "training"
+    metrics: Dict[str, Any] = field(default_factory=dict)
+    message: Optional[str] = None
+
+    @property
+    def progress(self) -> float:
+        """Get progress as fraction (0.0-1.0)."""
+        if self.total_steps and self.total_steps > 0:
+            return min(self.step / self.total_steps, 1.0)
+        return 0.0
+
+
+class TrainingCallback:
+    """Protocol-like base class for training callbacks.
+
+    Implement any subset of these methods to receive training events.
+    All methods are optional - unimplemented methods are no-ops.
+
+    Example:
+        >>> class MyCallback(TrainingCallback):
+        ...     def on_epoch_end(self, event: TrainingEvent) -> None:
+        ...         print(f"Epoch {event.step}: loss={event.metrics.get('loss')}")
+        ...
+        >>> generator.fit(data, callbacks=[MyCallback()])
+    """
+
+    def on_fit_start(self, event: TrainingEvent) -> None:
+        """Called when fitting begins."""
+        pass
+
+    def on_fit_end(self, event: TrainingEvent) -> None:
+        """Called when fitting completes."""
+        pass
+
+    def on_epoch_start(self, event: TrainingEvent) -> None:
+        """Called at the start of each training epoch."""
+        pass
+
+    def on_epoch_end(self, event: TrainingEvent) -> None:
+        """Called at the end of each training epoch."""
+        pass
+
+    def on_batch_start(self, event: TrainingEvent) -> None:
+        """Called at the start of each training batch."""
+        pass
+
+    def on_batch_end(self, event: TrainingEvent) -> None:
+        """Called at the end of each training batch."""
+        pass
+
+    def on_generate_start(self, event: TrainingEvent) -> None:
+        """Called when generation begins."""
+        pass
+
+    def on_generate_end(self, event: TrainingEvent) -> None:
+        """Called when generation completes."""
+        pass
+
+    def on_error(self, event: TrainingEvent, error: Exception) -> None:
+        """Called when an error occurs during training."""
+        pass
+
+
+class ProgressLoggerCallback(TrainingCallback):
+    """Simple callback that logs progress to the console.
+
+    Example:
+        >>> generator.fit(data, callbacks=[ProgressLoggerCallback()])
+    """
+
+    def __init__(self, log_frequency: int = 10) -> None:
+        """Initialize the callback.
+
+        Args:
+            log_frequency: Log every N epochs
+        """
+        self.log_frequency = log_frequency
+
+    def on_epoch_end(self, event: TrainingEvent) -> None:
+        """Log epoch progress."""
+        if event.step % self.log_frequency == 0:
+            loss = event.metrics.get("loss", "N/A")
+            print(f"Epoch {event.step}/{event.total_steps or '?'}: loss={loss}")
+
+    def on_fit_end(self, event: TrainingEvent) -> None:
+        """Log completion."""
+        print(f"Training completed in {event.step} epochs")

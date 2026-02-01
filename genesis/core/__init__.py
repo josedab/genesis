@@ -38,6 +38,7 @@ from genesis.core.exceptions import (
     UnsupportedDataTypeError,
     ValidationError,
 )
+from genesis.core.mixins import FittedGeneratorProtocol
 from genesis.core.types import (
     BackendType,
     ColumnMetadata,
@@ -49,6 +50,9 @@ from genesis.core.types import (
     GeneratorMethod,
     PrivacyLevel,
     PrivacyMetrics,
+    ProgressLoggerCallback,
+    TrainingCallback,
+    TrainingEvent,
 )
 
 __all__ = [
@@ -84,6 +88,11 @@ __all__ = [
     "GenerationResult",
     "EvaluationMetric",
     "PrivacyMetrics",
+    "TrainingEvent",
+    "TrainingCallback",
+    "ProgressLoggerCallback",
+    # Protocols
+    "FittedGeneratorProtocol",
     # Exceptions
     "GenesisError",
     "ConfigurationError",

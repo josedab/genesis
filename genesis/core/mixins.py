@@ -6,14 +6,77 @@ upsampling, scenario generation, and quality reporting.
 
 This follows the composition over inheritance principle,
 keeping the base generator focused on core fit/generate.
+
+The FittedGeneratorProtocol defines the interface that mixins expect
+from the generator they're composed with.
 """
 
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
 
 import pandas as pd
 
 if TYPE_CHECKING:
     from genesis.evaluation.report import QualityReport
+
+
+class FittedGeneratorProtocol(Protocol):
+    """Protocol defining the interface mixins expect from generators.
+
+    This protocol formalizes the implicit contract between mixins and
+    the generators they extend. Any class implementing this protocol
+    can be composed with the mixin classes.
+
+    Attributes:
+        _is_fitted: Whether the generator has been trained
+        _original_data: Training data (may be None if not stored)
+
+    Example:
+        >>> class MyGenerator(FittedGeneratorProtocol):
+        ...     _is_fitted: bool = False
+        ...     _original_data: Optional[pd.DataFrame] = None
+        ...
+        ...     def generate(self, n_samples: int, **kwargs) -> pd.DataFrame:
+        ...         ...
+    """
+
+    _is_fitted: bool
+    _original_data: Optional[pd.DataFrame]
+
+    def generate(
+        self,
+        n_samples: int,
+        conditions: Optional[Dict[str, Any]] = None,
+        apply_constraints: bool = True,
+    ) -> pd.DataFrame:
+        """Generate synthetic samples.
+
+        Args:
+            n_samples: Number of samples to generate
+            conditions: Optional generation conditions
+            apply_constraints: Whether to enforce constraints
+
+        Returns:
+            DataFrame with generated samples
+        """
+        ...
+
+    def fit(
+        self,
+        data: pd.DataFrame,
+        discrete_columns: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -> "FittedGeneratorProtocol":
+        """Fit the generator to training data.
+
+        Args:
+            data: Training DataFrame
+            discrete_columns: Categorical column names
+            **kwargs: Additional fitting parameters
+
+        Returns:
+            Self for method chaining
+        """
+        ...
 
 
 class ConditionalGenerationMixin:
