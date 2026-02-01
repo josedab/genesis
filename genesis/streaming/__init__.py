@@ -1,8 +1,10 @@
 """Streaming and incremental synthetic data generation.
 
-This module re-exports components from the streaming subpackage for
-backward compatibility. New code should import directly from
-genesis.streaming subpackage.
+This package provides capabilities for:
+- Streaming generation (generate data continuously)
+- Incremental model updates (update models without full retraining)
+- Online learning for synthetic data
+- Kafka and WebSocket integrations
 
 Example:
     >>> from genesis.streaming import StreamingGenerator
@@ -19,8 +21,6 @@ Example:
     >>> stream.partial_fit(new_data)
 """
 
-# Re-export all public symbols from the streaming subpackage
-# This maintains backward compatibility
 from genesis.streaming.config import StreamingConfig, StreamingStats
 from genesis.streaming.generator import (
     BatchIterator,
