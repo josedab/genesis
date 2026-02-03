@@ -5,6 +5,7 @@ This package provides capabilities for:
 - Incremental model updates (update models without full retraining)
 - Online learning for synthetic data
 - Kafka and WebSocket integrations
+- Production-ready streaming with exactly-once semantics (v1.5.0)
 
 Example:
     >>> from genesis.streaming import StreamingGenerator
@@ -19,6 +20,19 @@ Example:
     >>>
     >>> # Update model incrementally
     >>> stream.partial_fit(new_data)
+
+Production Streaming (v1.5.0):
+    >>> from genesis.streaming import ProductionKafkaProducer, ProducerConfig
+    >>>
+    >>> config = ProducerConfig(
+    ...     bootstrap_servers="kafka:9092",
+    ...     topic="synthetic-data",
+    ...     delivery_semantics=DeliverySemantics.EXACTLY_ONCE,
+    ... )
+    >>> producer = ProductionKafkaProducer(config, generator)
+    >>> producer.start()
+    >>> producer.produce(n_records=10000)
+    >>> producer.stop()
 """
 
 from genesis.streaming.config import StreamingConfig, StreamingStats
@@ -29,6 +43,22 @@ from genesis.streaming.generator import (
     generate_streaming,
 )
 from genesis.streaming.kafka import KafkaStreamingGenerator
+from genesis.streaming.production import (
+    BackpressureHandler,
+    BackpressureStrategy,
+    Checkpoint,
+    CheckpointManager,
+    DeadLetterQueue,
+    DeliverySemantics,
+    LocalSchemaRegistry,
+    ProducerConfig,
+    ProductionKafkaProducer,
+    ProductionStreamingPipeline,
+    RateLimiter,
+    SchemaFormat,
+    SchemaRegistry,
+    StreamingMetrics,
+)
 from genesis.streaming.websocket import WebSocketStreamingGenerator
 
 __all__ = [
@@ -43,4 +73,19 @@ __all__ = [
     # Integrations
     "KafkaStreamingGenerator",
     "WebSocketStreamingGenerator",
+    # Production streaming (v1.5.0)
+    "ProductionKafkaProducer",
+    "ProductionStreamingPipeline",
+    "ProducerConfig",
+    "DeliverySemantics",
+    "SchemaFormat",
+    "BackpressureStrategy",
+    "Checkpoint",
+    "CheckpointManager",
+    "StreamingMetrics",
+    "DeadLetterQueue",
+    "RateLimiter",
+    "BackpressureHandler",
+    "SchemaRegistry",
+    "LocalSchemaRegistry",
 ]
