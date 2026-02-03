@@ -9,6 +9,7 @@ from genesis.cli.commands.data import augment, domain, pipeline
 from genesis.cli.commands.evaluate import drift, evaluate, report
 from genesis.cli.commands.generate import generate
 from genesis.cli.commands.interactive import chat, dashboard
+from genesis.cli.commands.streaming import stream
 from genesis.cli.commands.version import version
 from genesis.version import __version__
 
@@ -41,6 +42,7 @@ main.add_command(drift)
 main.add_command(version)
 main.add_command(domain)
 main.add_command(pipeline)
+main.add_command(stream)
 
 
 if __name__ == "__main__":
