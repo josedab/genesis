@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "genesis-synth"
-version = "1.4.0"
+version = "1.5.0"
 description = "A comprehensive synthetic data generation platform for ML training, testing, and development"
 readme = "README.md"
 license = {text = "MIT"}
@@ -105,12 +105,26 @@ distributed = [
 streaming = [
     "kafka-python>=2.0.0,<3.0.0",
     "websockets>=10.0,<14.0",
+    "fastavro>=1.7.0,<2.0.0",
 ]
 reporting = [
     "weasyprint>=57.0,<62.0",
 ]
+connectors = [
+    "snowflake-connector-python>=3.0.0,<4.0.0",
+    "google-cloud-bigquery>=3.0.0,<4.0.0",
+    "databricks-sql-connector>=2.0.0,<4.0.0",
+]
+observability = [
+    "opentelemetry-api>=1.15.0,<2.0.0",
+    "opentelemetry-sdk>=1.15.0,<2.0.0",
+    "opentelemetry-exporter-otlp>=1.15.0,<2.0.0",
+]
+fairness = [
+    "aif360>=0.5.0,<1.0.0",
+]
 all = [
-    "genesis-synth[pytorch,tensorflow,llm,viz,api,image,integrations,tuning,distributed,streaming,reporting,dev,docs]",
+    "genesis-synth[pytorch,tensorflow,llm,viz,api,image,integrations,tuning,distributed,streaming,reporting,connectors,observability,fairness,dev,docs]",
 ]
 
 [project.scripts]
