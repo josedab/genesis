@@ -183,3 +183,14 @@ __all__ = [
 # Import with: from genesis.gpu import BatchedGenerator, create_gpu_generator
 # Import with: from genesis.domains import DomainGenerator, HealthcareGenerator, FinanceGenerator
 # Import with: from genesis.pipeline import PipelineBuilder, PipelineExecutor
+#
+# v1.5.0 Next-Gen modules:
+# Import with: from genesis.streaming.production import ProductionKafkaProducer, CheckpointManager
+# Import with: from genesis.sla import SLAContract, SLAValidator, SLAEnforcedGenerator
+# Import with: from genesis.zero_shot import ZeroShotSchemaGenerator, ZeroShotDataGenerator
+# Import with: from genesis.connectors import SnowflakeConnector, BigQueryConnector, DatabricksConnector
+# Import with: from genesis.fairness import FairnessAnalyzer, FairGenerator, CounterfactualGenerator
+# Import with: from genesis.saas import TenantManager, APIKeyManager, UsageMeter
+# Import with: from genesis.observability import GenesisTracer, MetricsCollector
+# Import with: from genesis.delta import DeltaGenerator, ChangeTracker, SCDGenerator
+# Import with: from genesis.explainability import ExplainableGenerator, AttributionTracker
