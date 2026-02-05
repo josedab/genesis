@@ -13,6 +13,17 @@ Example:
     >>> print(report.summary())
 """
 
+# Convenience functions from new modules (v2.1.0)
+from genesis.llm_finetuning import generate_safe_finetuning_data, audit_training_data
+from genesis.realtime_api import create_realtime_app, save_model_for_realtime
+from genesis.cicd import (
+    generate_github_workflow,
+    generate_gitlab_ci,
+)
+from genesis.dp_compiler import dp_query
+from genesis.cloud_deploy import quick_deploy as cloud_deploy
+from genesis.leaderboard import run_and_submit as submit_benchmark
+
 # Agents
 from genesis.agents import SyntheticDataAgent
 from genesis.augmentation import augment_imbalanced
@@ -143,6 +154,16 @@ __all__ = [
     "augment_imbalanced",
     "run_privacy_audit",
     "detect_drift",
+    # v2.1.0 Next-Gen Convenience Functions
+    "generate_safe_finetuning_data",
+    "audit_training_data",
+    "create_realtime_app",
+    "save_model_for_realtime",
+    "generate_github_workflow",
+    "generate_gitlab_ci",
+    "dp_query",
+    "cloud_deploy",
+    "submit_benchmark",
     # Exceptions
     "GenesisError",
     "ConfigurationError",
@@ -194,3 +215,24 @@ __all__ = [
 # Import with: from genesis.observability import GenesisTracer, MetricsCollector
 # Import with: from genesis.delta import DeltaGenerator, ChangeTracker, SCDGenerator
 # Import with: from genesis.explainability import ExplainableGenerator, AttributionTracker
+#
+# v2.0.0 Next-Gen modules (NEW):
+# Import with: from genesis.agents.agentic import AgenticDataGenerator, AgentOrchestrator
+# Import with: from genesis.benchmarking import BenchmarkSuite, BenchmarkMetrics
+# Import with: from genesis.production_mirror import ProductionMirror, DriftAwareMirror
+# Import with: from genesis.privacy_budget import PrivacyBudgetOrchestrator, CompositionCalculator
+# Import with: from genesis.lakehouse import SyntheticLakehouse, LakehouseWriter
+# Import with: from genesis.model_hub import ModelHub, ModelCard, PretrainedGenerator
+# Import with: from genesis.compliance_as_code import PolicyValidator, PrivacyPolicy
+# Import with: from genesis.marketplace_v2 import MarketplaceV2, Organization, PaymentProcessor
+# Import with: from genesis.edge_generation import EdgeExporter, EdgeRuntime, export_to_onnx
+# Import with: from genesis.causality import CausalModel, CausalGenerator, CausalDiscovery
+#
+# v2.1.0 Next-Gen modules (NEW - Implemented):
+# Import with: from genesis.realtime_api import RealtimeGenerator, RealtimeConfig, create_realtime_app
+# Import with: from genesis.cicd import SyntheticDataPipeline, SchemaDriftDetector, QualityGate
+# Import with: from genesis.dp_compiler import DPCompiler, SQLParser, DPBudgetManager
+# Import with: from genesis.federated_marketplace import FederatedMarketplace, ModelPackage
+# Import with: from genesis.cloud_deploy import CloudDeployer, deploy_to_aws, deploy_to_gcp
+# Import with: from genesis.leaderboard import Leaderboard, LeaderboardEntry, Submission
+# Import with: from genesis.llm_finetuning import FineTuningDataGenerator, SafetyConfig, MemorizationDetector

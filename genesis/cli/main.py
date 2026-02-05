@@ -9,6 +9,14 @@ from genesis.cli.commands.data import augment, domain, pipeline
 from genesis.cli.commands.evaluate import drift, evaluate, report
 from genesis.cli.commands.generate import generate
 from genesis.cli.commands.interactive import chat, dashboard
+from genesis.cli.commands.nextgen import (
+    cicd,
+    deploy,
+    dp_query_cmd,
+    finetune_data,
+    leaderboard,
+    realtime,
+)
 from genesis.cli.commands.streaming import stream
 from genesis.cli.commands.version import version
 from genesis.version import __version__
@@ -43,6 +51,14 @@ main.add_command(version)
 main.add_command(domain)
 main.add_command(pipeline)
 main.add_command(stream)
+
+# Next-gen commands (v2.1.0)
+main.add_command(realtime)
+main.add_command(cicd)
+main.add_command(deploy)
+main.add_command(dp_query_cmd, name="dp-query")
+main.add_command(leaderboard)
+main.add_command(finetune_data, name="finetune-data")
 
 
 if __name__ == "__main__":
