@@ -108,7 +108,7 @@ streaming = [
     "fastavro>=1.7.0,<2.0.0",
 ]
 reporting = [
-    "weasyprint>=57.0,<62.0",
+    "weasyprint>=57.0,<67.0",
 ]
 connectors = [
     "snowflake-connector-python>=3.0.0,<4.0.0",
